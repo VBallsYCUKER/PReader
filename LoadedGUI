@@ -1,0 +1,74 @@
+-- Create a ScreenGui for the player
+local player = game.Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = player.PlayerGui
+
+-- Create the main frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 50, 0, 50)  -- Start small for the tween
+mainFrame.Position = UDim2.new(0.5, -25, 0.5, -25)  -- Start in the center of the screen
+mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)  -- Anchor the frame's center
+mainFrame.BackgroundColor3 = Color3.fromRGB(93, 121, 150)  -- Grey-blue color
+mainFrame.Parent = screenGui
+
+-- Add UI corner to the main frame
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 12)
+uiCorner.Parent = mainFrame
+
+-- Detect if the device is a phone
+local isPhone = game:GetService("UserInputService").TouchEnabled
+
+-- Tween the frame to either fill most of the screen or a small part for phones
+local targetSize
+if isPhone then
+	targetSize = UDim2.new(0, 300, 0, 300)  -- Smaller square size for phones
+else
+	targetSize = UDim2.new(0, 400, 0, 400)  -- Larger square size for other devices
+end
+
+-- Create a tweening function for the frame (for opening)
+local tweenService = game:GetService("TweenService")
+local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)  -- Smooth transition
+local tweenGoal = {Size = targetSize}
+
+local tween = tweenService:Create(mainFrame, tweenInfo, tweenGoal)
+
+-- Play the tween to expand the frame
+tween:Play()
+
+-- Add the "Loaded" TextLabel and center it
+local loadedLabel = Instance.new("TextLabel")
+loadedLabel.Text = "Loaded Script"
+loadedLabel.Size = UDim2.new(1, 0, 1, 0)  -- Fill the entire frame
+loadedLabel.Position = UDim2.new(0.5, 0, 0.5, 0)  -- Center it
+loadedLabel.AnchorPoint = Vector2.new(0.5, 0.5)  -- Center based on the middle
+loadedLabel.BackgroundTransparency = 1
+loadedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text
+loadedLabel.TextScaled = true  -- Scale the text
+loadedLabel.Font = Enum.Font.SourceSans
+loadedLabel.Parent = mainFrame
+
+-- Create a cleaner close button
+local closeButton = Instance.new("TextButton")
+closeButton.Text = "X"
+closeButton.Size = UDim2.new(0, 50, 0, 50)
+closeButton.Position = UDim2.new(1, -60, 0, 10)  -- Position it at the top-right corner
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- Red background
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text
+closeButton.Font = Enum.Font.SourceSans
+closeButton.TextSize = 24
+closeButton.Parent = mainFrame
+
+-- Tween the frame to shrink smoothly when closed
+closeButton.MouseButton1Click:Connect(function()
+	local closeTweenGoal = {Size = UDim2.new(0, 50, 0, 50), Position = UDim2.new(0.5, -25, 0.5, -25)}
+	local closeTweenInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)  -- Smooth transition for closing
+	local closeTween = tweenService:Create(mainFrame, closeTweenInfo, closeTweenGoal)
+	closeTween:Play()
+
+	-- Destroy the ScreenGui once the tween finishes
+	closeTween.Completed:Connect(function()
+		screenGui:Destroy()
+	end)
+end)
