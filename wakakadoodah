@@ -1,0 +1,273 @@
+local player = game.Players.LocalPlayer 
+local playerGui = player:WaitForChild("PlayerGui")
+local TweenService = game:GetService("TweenService")
+
+-- Create the ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = playerGui
+
+-- Create the Base Frame
+local squareFrame = Instance.new("Frame")
+squareFrame.Size = UDim2.new(0, 0, 0, 0) -- Start collapsed
+squareFrame.AnchorPoint = Vector2.new(0.5, 0.5) -- Center the anchor point
+squareFrame.Position = UDim2.new(0.5, 0, 0.5, 0) -- Center the frame
+squareFrame.BackgroundColor3 = Color3.fromRGB(54, 54, 54)
+squareFrame.Parent = screenGui
+
+-- Add UICorner
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 12)
+uiCorner.Parent = squareFrame
+
+-- Add Username Text Label
+local usernameLabel = Instance.new("TextLabel")
+usernameLabel.AnchorPoint = Vector2.new(0, 1)
+usernameLabel.Position = UDim2.new(0, 10, 1, -10)
+usernameLabel.Size = UDim2.new(1, -20, 0, 30)
+usernameLabel.BackgroundTransparency = 1
+usernameLabel.Text = player.DisplayName .. " (@" .. player.Name .. ")"
+usernameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+usernameLabel.Font = Enum.Font.GothamBold
+usernameLabel.TextSize = 18
+usernameLabel.TextXAlignment = Enum.TextXAlignment.Left
+usernameLabel.Parent = squareFrame
+usernameLabel.Visible = false -- Hide initially
+
+-- Add Close (X) Button
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 30, 0, 30)
+closeButton.Position = UDim2.new(1, 0, 0, 0)
+closeButton.AnchorPoint = Vector2.new(1, 0)
+closeButton.BackgroundTransparency = 1
+closeButton.Text = "X"
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextSize = 18
+closeButton.Parent = squareFrame
+
+-- Create Tabs Frame
+local tabsFrame = Instance.new("Frame")
+tabsFrame.Size = UDim2.new(0, 80, 0.8, 0) -- Slightly shorter than full height
+tabsFrame.Position = UDim2.new(1, -80, 0.2, 0) -- Moved down a bit
+tabsFrame.BackgroundTransparency = 1
+tabsFrame.Parent = squareFrame
+tabsFrame.Visible = false -- Hide tabs initially
+
+local function createTabButton(name, position)
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(1, 0, 0, 50)
+	button.Position = UDim2.new(0, 0, 0, position)
+	button.BackgroundTransparency = 1
+	button.Text = name
+	button.TextColor3 = Color3.fromRGB(255, 255, 255)
+	button.Font = Enum.Font.GothamBold
+	button.TextSize = 18
+	button.Parent = tabsFrame
+	return button
+end
+
+-- Create Tabs
+local dbuTab = createTabButton("DBU", 0)
+local srTab = createTabButton("SR", 60)
+local creditsTab = createTabButton("Credits", 120)
+
+-- Create Main Content Pages
+local pages = {}
+
+for _, pageName in pairs({ "DBU", "SR", "Credits" }) do
+	local pageFrame = Instance.new("Frame")
+	pageFrame.Size = UDim2.new(1, -80, 1, 0)
+	pageFrame.Position = UDim2.new(0, 0, 0, 0)
+	pageFrame.BackgroundTransparency = 1
+	pageFrame.Visible = false
+	pageFrame.Parent = squareFrame
+	pages[pageName] = pageFrame
+end
+
+-- Add Content to "DBU"
+local dbuPage = pages["DBU"]
+local buttonNames = { "AK", "Unnamed button", "Auto", "Auto DC" } -- Updated button names
+
+for i = 1, 4 do
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(0.4, 0, 0.3, 0) -- Adjusted size
+	-- Adjusted positions: moved the buttons slightly lower
+	button.Position = UDim2.new(((i - 1) % 2) * 0.45 + 0.05, 0, math.floor((i - 1) / 2) * 0.35 + 0.15, 0)
+	button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+	button.Text = buttonNames[i] -- Assigning names
+	button.TextColor3 = Color3.fromRGB(255, 255, 255)
+	button.Font = Enum.Font.GothamBold
+	button.TextSize = 16
+	button.Parent = dbuPage
+end
+
+-- Add Content to "Credits"
+local creditsPage = pages["Credits"]
+local creditsLabel = Instance.new("TextLabel")
+creditsLabel.Size = UDim2.new(1, 0, 0.2, 0) -- Smaller size
+creditsLabel.Position = UDim2.new(0, 0, 0.4, 0) -- Centered vertically
+creditsLabel.BackgroundTransparency = 1
+creditsLabel.Text = "Idea (everything) + Spirit (reader webhooks n read design)"
+creditsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+creditsLabel.Font = Enum.Font.GothamBold
+creditsLabel.TextSize = 17.3 -- Smaller font
+creditsLabel.TextScaled = false
+creditsLabel.Parent = creditsPage
+
+-- Show DBU (Main Page) by Default
+pages["DBU"].Visible = true
+
+-- Tab Button Click Handlers
+local function showPage(pageName)
+	for name, page in pairs(pages) do
+		page.Visible = (name == pageName)
+	end
+end
+
+dbuTab.MouseButton1Click:Connect(function() showPage("DBU") end)
+srTab.MouseButton1Click:Connect(function() showPage("SR") end)
+creditsTab.MouseButton1Click:Connect(function() showPage("Credits") end)
+
+-- Close Button Logic
+closeButton.MouseButton1Click:Connect(function()
+	screenGui:Destroy()
+end)
+
+-- Tween Animation
+local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local targetSize = UDim2.new(0.7, 0, 0.7, 0)
+local tween = TweenService:Create(squareFrame, tweenInfo, { Size = targetSize })
+tween:Play()
+
+-- Wait for tween to finish before showing the text
+tween.Completed:Wait()
+
+-- Now show the text
+usernameLabel.Visible = true
+tabsFrame.Visible = true
+dbuTab.Visible = true
+srTab.Visible = true
+creditsTab.Visible = true
+
+
+-- Function to format numbers with suffixes
+function format_number(number)
+	local suffixes = {"", "K", "M", "B", "T", "QD"}
+	local suffix_index = 1
+
+	while math.abs(number) >= 1000 and suffix_index < #suffixes do
+		number = number / 1000.0
+		suffix_index = suffix_index + 1
+	end
+
+	return string.format("%.2f%s", number, suffixes[suffix_index])
+end
+
+-- Create a ScrollingFrame for the leaderboard (Smaller version)
+local scrollFrame = Instance.new("ScrollingFrame")
+scrollFrame.Name = "LeaderboardFrame"
+scrollFrame.Size = UDim2.new(0.7, 0, 0.6, 0) -- Adjusted size to make it smaller
+scrollFrame.Position = UDim2.new(0.15, 0, 0.2, 0) -- Adjusted position to fit the new size
+scrollFrame.BackgroundColor3 = Color3.new(0.211765, 0.211765, 0.211765)
+scrollFrame.BackgroundTransparency = 0.5
+scrollFrame.ScrollBarThickness = 12
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0) -- Start with empty canvas
+scrollFrame.Parent = pages["SR"]
+
+-- Create a UIListLayout to arrange leaderboard entries vertically
+local listLayout = Instance.new("UIListLayout")
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.Parent = scrollFrame
+
+-- Create a TextLabel to display leaderboard text
+local leaderboardText = Instance.new("TextLabel")
+leaderboardText.Name = "LeaderboardText"
+leaderboardText.Size = UDim2.new(0, 200, 0, 30)
+leaderboardText.Position = UDim2.new(0.5, -100, 0, -12)
+leaderboardText.Text = "Leaderboard"
+leaderboardText.TextColor3 = Color3.new(1, 1, 1)
+leaderboardText.BackgroundTransparency = 1
+leaderboardText.Parent = scrollFrame
+
+-- Function to update the leaderboard
+local function updateLeaderboard()
+	-- Clear previous entries
+	for _, child in ipairs(scrollFrame:GetChildren()) do
+		if child ~= leaderboardText then
+			child:Destroy()
+		end
+	end
+
+	-- Get joined players
+	local players = game:GetService("Players"):GetPlayers()
+
+	-- Create new entries
+	local yOffset = 0
+	for i, player in ipairs(players) do
+		local entryFrame = Instance.new("Frame")
+		entryFrame.Name = "EntryFrame"
+		entryFrame.Size = UDim2.new(1, 0, 0, 30)
+		entryFrame.Position = UDim2.new(0, 10, 0, 10 + (i - 1) * 35)
+		entryFrame.BackgroundColor3 = Color3.new(0.211765, 0.211765, 0.211765)
+		entryFrame.BackgroundTransparency = 0.5
+		entryFrame.Parent = scrollFrame
+
+		local nameLabel = Instance.new("TextLabel")
+		nameLabel.Name = "NameLabel"
+		nameLabel.Size = UDim2.new(0.3, -20, 1, 0)
+		nameLabel.Position = UDim2.new(0, 10, 0, 0)
+		nameLabel.Text = player.Name
+		nameLabel.TextColor3 = Color3.new(1, 1, 1)
+		nameLabel.BackgroundTransparency = 1
+		nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+		nameLabel.Parent = entryFrame
+
+		-- Fetch stat data
+		local playerStats = game:GetService("ReplicatedStorage"):FindFirstChild("Datas"):FindFirstChild(tostring(player.UserId))
+		if playerStats then
+			-- Fetch rebirth data
+			local playerRebirths = playerStats:FindFirstChild("Rebirth")
+
+			local strengthStat = playerStats:FindFirstChild("Strength")
+			local defenceStat = playerStats:FindFirstChild("Defense")
+			local energyStat = playerStats:FindFirstChild("Energy")
+			local speedStat = playerStats:FindFirstChild("Speed")
+
+			if strengthStat and defenceStat and energyStat and speedStat then
+				local averageLabel = Instance.new("TextLabel")
+				averageLabel.Name = "AverageLabel"
+				averageLabel.Size = UDim2.new(0.25, 0, 1, 0)
+				averageLabel.Position = UDim2.new(0.5, -70, 0, 0 + (i - 1) * 0)
+				local averageValue = (strengthStat.Value + defenceStat.Value + energyStat.Value + speedStat.Value) / 4
+				averageLabel.Text = "Avg: " .. format_number(averageValue)
+				averageLabel.TextColor3 = Color3.new(1, 1, 1)
+				averageLabel.BackgroundTransparency = 1
+				averageLabel.TextXAlignment = Enum.TextXAlignment.Left
+				averageLabel.Parent = entryFrame
+			end
+
+			if playerRebirths then
+				local rebirthLabel = Instance.new("TextLabel")
+				rebirthLabel.Name = "RebirthLabel"
+				rebirthLabel.Size = UDim2.new(0.25, 0, 1, 0)
+				rebirthLabel.Position = UDim2.new(1, -150, 0, 0 + (i - 1) * 0)
+				rebirthLabel.Text = "Rebirths: " .. tostring(playerRebirths.Value)
+				rebirthLabel.TextColor3 = Color3.new(1, 1, 1)
+				rebirthLabel.BackgroundTransparency = 1
+				rebirthLabel.TextXAlignment = Enum.TextXAlignment.Right
+				rebirthLabel.Parent = entryFrame
+			end
+		end
+
+		yOffset = yOffset + 40
+	end
+
+	-- Update the canvas size to fit the new entries
+	scrollFrame.CanvasSize = UDim2.new(0, 0, 0, yOffset)
+end
+
+-- Schedule leaderboard updates every 2 seconds
+while true do
+	wait(2)
+	updateLeaderboard()
+end
